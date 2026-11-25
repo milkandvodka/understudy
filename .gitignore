@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.vercel/
+test-results/
+docs/superpowers/
+results.sample.json
+.superpowers/
