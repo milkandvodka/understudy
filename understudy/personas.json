@@ -1,0 +1,52 @@
+[
+  {
+    "id": "fresher-anxious",
+    "description": "You are a first-year engineering student. Last week a senior told you about the 75% attendance rule and that people get debarred from exams, and you have been quietly worried ever since. You are comfortable with apps but have never tracked attendance yourself.",
+    "arrivedFrom": "A senior forwarded this link in your branch's WhatsApp group."
+  },
+  {
+    "id": "spreadsheet-senior",
+    "description": "You are a third-year student who already tracks attendance in a Google Sheet you built in first year. You are skeptical of new apps because most of them turn out to be worse than your sheet.",
+    "arrivedFrom": "A classmate dropped the link in your section's group chat."
+  },
+  {
+    "id": "privacy-guarded",
+    "description": "You are a final-year student who refuses to hand personal details like your roll number or college email to websites you don't know. You read things carefully before typing anything.",
+    "arrivedFrom": "Someone linked it in a Reddit comment about attendance."
+  },
+  {
+    "id": "between-classes",
+    "description": "You are a second-year student on your phone in the corridor with about two minutes before your next lecture starts. You have very little patience right now.",
+    "arrivedFrom": "You tapped it from someone's Instagram story."
+  },
+  {
+    "id": "at-68-percent",
+    "description": "You are a second-year student sitting at 68% in one subject with end-semester exams coming up, and you are panicking about whether you can still recover.",
+    "arrivedFrom": "You searched \"how many classes can I bunk\" and this came up."
+  },
+  {
+    "id": "club-lead",
+    "description": "You run a student club and juniors keep asking you about attendance. You are judging whether this is good enough to recommend to them, so you look at it more critically than usual.",
+    "arrivedFrom": "Someone posted it in your club's Discord server."
+  },
+  {
+    "id": "lateral-entry",
+    "description": "You joined college this semester as a lateral-entry student. You don't know how the attendance portal works yet and feel a step behind everyone else.",
+    "arrivedFrom": "A friend sent you the link."
+  },
+  {
+    "id": "burned-before",
+    "description": "You once signed up for a 'free' student app that then spammed your email and phone for months. Since then you are wary of anything that asks you to sign up.",
+    "arrivedFrom": "You scanned a QR code on a poster near the canteen."
+  },
+  {
+    "id": "idle-scroller",
+    "description": "You are bored and scrolling on your phone. You have no particular problem with attendance and only tapped this because the ad caught your eye.",
+    "arrivedFrom": "You tapped an Instagram ad."
+  },
+  {
+    "id": "topper-95",
+    "description": "You have 95% attendance in every subject and rarely miss class. You don't really need help with attendance, but you are curious.",
+    "arrivedFrom": "Your roommate recommended it."
+  }
+]
