@@ -1,0 +1,22 @@
+{
+  "name": "understudy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rehearse Flagsmith experiments on AI personas before real traffic arrives",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "understudy": "node --env-file=.env understudy/run.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@flagsmith/flagsmith": "^12.6.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.2"
+  }
+}
