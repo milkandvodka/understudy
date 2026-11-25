@@ -1,0 +1,136 @@
+/* Exercise-book page: cool paper, fountain-pen ink, and the red margin line that also marks 75%. */
+:root {
+  --paper: #f4f7fc;
+  --ink: #1d2b53;
+  --muted: #55648a;
+  --rule: #d3dcec;
+  --field: #ffffff;
+  --margin: #d2463c;
+  --safe: #2f855a;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0f1629;
+    --ink: #e6ebf6;
+    --muted: #9ba9c8;
+    --rule: #28345a;
+    --field: #172040;
+    --margin: #ff6b5e;
+    --safe: #5bc48a;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1.0625rem/1.55 'Atkinson Hyperlegible', system-ui, sans-serif;
+}
+
+/* The notebook margin. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 auto 0 1.25rem;
+  width: 2px;
+  background: var(--margin);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+main, footer {
+  max-width: 34rem;
+  padding: 0 1rem 0 2.5rem;
+}
+
+main { padding-top: 1.75rem; padding-bottom: 2rem; }
+
+.brand { margin: 0 0 2.5rem; font-weight: 700; font-size: 1.125rem; }
+
+h1 {
+  margin: 0 0 1rem;
+  max-width: 15ch;
+  font-size: clamp(2.1rem, 9vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+}
+
+h2 { margin: 0 0 0.5rem; font-size: 1.35rem; line-height: 1.25; }
+
+.lede { margin: 0 0 1.25rem; max-width: 36ch; color: var(--muted); }
+
+.points { margin: 0 0 1.75rem; padding-left: 1.4rem; }
+.points li { margin: 0.25rem 0; }
+.points li::marker { content: '✓  '; color: var(--safe); font-weight: 700; }
+
+section[id] { margin-top: 2.25rem; }
+section[id]:not([hidden]) { animation: open 0.22s ease-out; }
+@keyframes open { from { opacity: 0; transform: translateY(6px); } }
+
+button {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1.25rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--ink);
+  color: var(--paper);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover { filter: brightness(1.15); }
+
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+[tabindex="-1"]:focus { outline: none; }
+
+.note { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.9375rem; }
+
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.9375rem; }
+th, td { padding: 0.55rem 0.25rem; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
+th:first-child { text-align: left; white-space: normal; }
+thead th { color: var(--muted); font-weight: 400; font-size: 0.875rem; }
+tr.low td:nth-child(4) { color: var(--margin); font-weight: 700; }
+
+/* Attendance bar with the 75% line drawn on it. */
+.bar {
+  position: relative;
+  display: inline-block;
+  width: 3rem;
+  height: 0.4rem;
+  margin-right: 0.5rem;
+  border-radius: 1px;
+  background: linear-gradient(var(--safe), var(--safe)) 0 0 / var(--p) 100% no-repeat, var(--rule);
+  vertical-align: middle;
+}
+tr.low .bar { background: linear-gradient(var(--margin), var(--margin)) 0 0 / var(--p) 100% no-repeat, var(--rule); }
+.bar::after { content: ''; position: absolute; left: 75%; top: -3px; bottom: -3px; width: 2px; background: var(--margin); }
+
+form { display: grid; }
+label { margin-top: 0.9rem; font-weight: 700; font-size: 0.9375rem; }
+input {
+  margin-top: 0.3rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  background: var(--field);
+  color: var(--ink);
+  font: inherit;
+}
+input[aria-invalid='true'] { border-color: var(--margin); }
+.error { min-height: 1.3em; margin-top: 0.2rem; color: var(--margin); font-size: 0.875rem; }
+
+.done { margin: 0; font-size: 1.4rem; font-weight: 700; color: var(--safe); }
+
+footer { padding-bottom: 2rem; color: var(--muted); font-size: 0.8125rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  section[id]:not([hidden]) { animation: none; }
+}
