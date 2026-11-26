@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest'
-import { normalizeAction, summarize, decide, parseActionText } from '../understudy/actions.js'
+import { normalizeAction, summarize, decide, parseActionText, makeStreakBreaker, redactText } from '../understudy/actions.js'
 
 it('extracts the JSON action from fenced or chatty replies', () => {
   expect(parseActionText('{"action":"leave","reason":"meh"}')).toMatchObject({ action: 'leave' })
@@ -38,4 +38,29 @@ it('applies the pre-registered decision rule at its boundaries', () => {
   expect(decide(0.95).verdict).toBe('inconclusive')
   expect(decide(0.5).verdict).toBe('inconclusive')
   expect(decide(0.03).verdict).toBe('keep_control')
+})
+
+// Final review: the verdict must never come from a malformed hand-copied number.
+it('rejects a chance that is not a probability', () => {
+  for (const bad of ['< 1%', NaN, undefined, 1.5, -0.1]) expect(() => decide(bad)).toThrow(/probability/)
+})
+
+it('keeps control just below the lower bound, not at it', () => {
+  expect(decide(0.049).verdict).toBe('keep_control')
+  expect(decide(0.05).verdict).toBe('inconclusive')
+})
+
+// Final review: a broken model setup must not keep opening pages (each one is a Flagsmith exposure).
+it('trips after three errors in a row and resets on any other outcome', () => {
+  const breaker = makeStreakBreaker(3)
+  expect(['error', 'error', 'left', 'error', 'error'].map(o => breaker.record(o))).toEqual([false, false, false, false, false])
+  expect(breaker.record('error')).toBe(true)
+})
+
+// Final review: made-up but realistic emails must not be published in transcripts.
+it('redacts typed emails from transcripts', () => {
+  expect(redactText('riya.kulkarni2006@gmail.com')).toBe('[email]')
+  expect(redactText('my mail is a.b@college.edu ok')).toBe('my mail is [email] ok')
+  expect(redactText('Aarav Mehta')).toBe('Aarav Mehta')
+  expect(redactText(null)).toBe(null)
 })

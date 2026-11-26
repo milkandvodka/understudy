@@ -1,7 +1,7 @@
 // One persona, one fresh browser (a new visitor), one action at a time.
 // All Flagsmith traffic comes from the page itself; Understudy never talks to Flagsmith.
 import { STORAGE_KEY, AGENT_PREFIX } from '../src/experiment.js'
-import { parseActionText, normalizeAction } from './actions.js'
+import { parseActionText, normalizeAction, redactText } from './actions.js'
 
 export const SYSTEM_PROMPT = `You are role-playing a real college student browsing a website on your phone. Stay in character as the persona you are given. Act the way this person really would: real people skim, hesitate, get bored or suspicious, and often leave without finishing anything. You are never required to sign up. If you choose to fill in a form, invent plausible details that fit your persona. Each turn you see the page text and its numbered interactive elements. Choose exactly one next action: click an element, type into a text field, or leave the site. Keep "thought" to one short sentence in your persona's voice. Reply with only a JSON object and nothing else: {"thought": string, "action": "click" | "type" | "leave", "target": element number or null, "text": text to type or null, "reason": why you are leaving, or null}`
 
@@ -82,6 +82,17 @@ export async function chooseAction({ apiKey, persona, snapshot, history }) {
   }
 }
 
+// One tiny call before any page opens, so a bad key or outage never reaches Flagsmith as junk exposures.
+export async function preflight(apiKey) {
+  const res = await fetch(OLLAMA_URL, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, stream: false, think: false, messages: [{ role: 'user', content: 'Reply with OK.' }] }),
+    signal: AbortSignal.timeout(30_000),
+  })
+  if (!res.ok) throw new Error(`Ollama check failed: ${res.status} ${(await res.text()).slice(0, 120)}`)
+}
+
 export async function runSession({ browser, url, persona, apiKey, maxSteps = 12, onStep }) {
   const started = Date.now()
   const sessionId = crypto.randomUUID()
@@ -121,7 +132,7 @@ export async function runSession({ browser, url, persona, apiKey, maxSteps = 12,
           action = { kind: 'invalid', why: `could not ${action.kind}: ${e.message.split('\n')[0]}` }
         }
       }
-      steps.push({ thought: raw?.thought ?? null, action: action.kind, label: el?.label ?? null, text: action.text ?? null, why: action.why ?? action.reason ?? null })
+      steps.push({ thought: redactText(raw?.thought ?? null), action: action.kind, label: el?.label ?? null, text: redactText(action.text ?? null), why: action.why ?? action.reason ?? null })
       onStep?.(steps.at(-1))
       if (action.kind === 'invalid') {
         if (++invalidStreak >= 3) { outcome = 'error'; leaveReason = `3 invalid actions in a row (last: ${action.why})` }

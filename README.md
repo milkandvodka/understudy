@@ -48,11 +48,11 @@ All experiment wiring lives in [`src/experiment.js`](src/experiment.js), so it c
 
 | Step | Where |
 |---|---|
-| Identify the visitor (anonymous UUID in localStorage) and init with events on | [`src/main.js:16`](src/main.js#L16) |
-| **Exposure:** `getExperimentFlag('onboarding_flow')` records which version this visitor saw | [`src/main.js:17`](src/main.js#L17) |
-| Flush right away, so visitors who bounce in 3 seconds still count | [`src/main.js:18`](src/main.js#L18) |
-| Fall back to control after 2.5 s if Flagsmith is slow or blocked | [`src/main.js:15`](src/main.js#L15), [`src/experiment.js:26`](src/experiment.js#L26) |
-| **Conversion:** `trackEvent('signup_completed')` | [`src/main.js:66`](src/main.js#L66) |
+| Identify the visitor (anonymous UUID in localStorage) and init with events on | [`src/main.js:17`](src/main.js#L17) |
+| **Exposure:** `getExperimentFlag('onboarding_flow')` records which version this visitor saw | [`src/main.js:19`](src/main.js#L19) |
+| Flush right away, so visitors who bounce in 3 seconds still count | [`src/main.js:20`](src/main.js#L20) |
+| If Flagsmith hasn't answered within 4 s, show control and record **no** exposure, so nobody is counted in a version they didn't see | [`src/main.js:16`](src/main.js#L16), [`src/experiment.js:27`](src/experiment.js#L27) |
+| **Conversion:** `trackEvent('signup_completed')` | [`src/main.js:69`](src/main.js#L69) |
 | The decision rule applied in code, with the persona breakdown | [`understudy/report.js`](understudy/report.js) → [`REPORT.md`](REPORT.md) |
 | Ship the winner with the same flag, then delete the losing code | _see "Shipping the winner"_ |
 
@@ -80,7 +80,7 @@ for each session:
 npm ci
 npx playwright install chromium
 cp .env.example .env    # VITE_FLAGSMITH_ENV_ID (client-side key) + OLLAMA_API_KEY
-npm test                # 15 tests
+npm test                # 21 tests
 npm run dev             # Classmate on http://localhost:5173
 npm run understudy -- --sessions 20 --url http://localhost:5173            # rehearse
 npm run understudy -- --sessions 2 --url http://localhost:5173 --headed    # watch them
@@ -98,7 +98,8 @@ Production experiment 617, 360 persona visits in three waves of 120 (DeepSeek V4
 | `preview_first` | 185 | 18 | **9.7%** |
 
 - **What Flagsmith says:** preview_first changed sign-ups by **−58.4%**, with a 95% credible interval of **−79.9% to −36.9%**. Even the most optimistic plausible value is a big drop. Chance that preview_first beats control: **< 1%**.
-- **What the pre-registered rule says:** below 5%, so **keep control**. The hypothesis is rejected, clearly. `decide()` in [`understudy/actions.js`](understudy/actions.js) makes this call, not a person reading a chart.
+- **What the pre-registered rule says:** below 5%, so **keep control**. The hypothesis is rejected, clearly. The numbers are copied by hand from the dashboard into [`results/flagsmith.json`](results/flagsmith.json). `decide()` in [`understudy/actions.js`](understudy/actions.js) then makes the call, and refuses anything that isn't a probability.
+- **Robustness:** by chance, preview_first drew more of the personas who never sign up. Averaging each persona's own rate instead gives control 22.0% and preview_first 10.2%, a **−53.7%** change. The conclusion holds.
 - **Do the two sources agree?** Flagsmith's conversions match Understudy's transcripts exactly (40 and 18). Visitors are off by one per variant, because a brief network drop in wave 1 also lost two exposure requests.
 
 **Why it lost (from the transcripts).** Skeptical personas (privacy-guarded, burned-before, the bored scroller, the one with two minutes before class) never signed up on either version. The whole gap comes from motivated students:
@@ -118,6 +119,8 @@ _Coming: the flag change in Flagsmith and the cleanup commit that deletes the lo
 ## Limitations
 
 - **Personas aren't people.** This is a rehearsal. It catches broken flows, mis-wired metrics and large effects before you spend real traffic. It doesn't replace a test on real users.
+- The page's footer ("Nothing you type is stored or sent anywhere") sits outside the part the personas read, in both versions. Privacy-wary personas never saw it, which may be part of why they never signed up.
+- Transcripts are published with typed emails replaced by `[email]`; every name and address in them was invented by the model.
 - One model, one metric. All three waves ran within one hour, so this says nothing about day-of-week or time effects.
 - Five wave-1 sessions hit a local network drop after the page loaded. Flagsmith counts them as non-converting visitors (4 control, 1 preview), which slightly favours preview_first. Even so, it lost by a wide margin.
 - The persona × variant breakdown has small cells. It shows direction, not proof.

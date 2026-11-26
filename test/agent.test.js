@@ -1,5 +1,5 @@
 import { it, expect, vi } from 'vitest'
-import { MODEL, OLLAMA_URL, chooseAction } from '../understudy/agent.js'
+import { MODEL, OLLAMA_URL, chooseAction, preflight } from '../understudy/agent.js'
 
 it('personas run only on DeepSeek V4.1 Flash via Ollama Cloud', () => {
   expect(MODEL).toBe('deepseek-v4.1-flash:cloud')
@@ -20,5 +20,17 @@ it('retries the model call when the network drops', async () => {
   } finally {
     vi.unstubAllGlobals()
     vi.useRealTimers()
+  }
+})
+
+// Final review: check the model works before any page is opened.
+it('preflight fails fast on a bad key and passes on a working one', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 401, text: async () => 'unauthorized' }))
+  try {
+    await expect(preflight('bad-key')).rejects.toThrow(/401/)
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ message: { content: 'ok' } }) }))
+    await expect(preflight('good-key')).resolves.toBeUndefined()
+  } finally {
+    vi.unstubAllGlobals()
   }
 })

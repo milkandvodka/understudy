@@ -49,6 +49,10 @@ const pct = x => `${Math.round(x * 1000) / 10}%`
 
 // The pre-registered rule (decision.json), applied to Flagsmith's chance that preview_first beats control.
 export function decide(chance, r = rule) {
+  // The number is copied by hand from the dashboard: refuse anything that is not a probability rather than call it inconclusive.
+  if (typeof chance !== 'number' || !Number.isFinite(chance) || chance < 0 || chance > 1) {
+    throw new TypeError(`decide() needs a probability between 0 and 1, got ${JSON.stringify(chance)}`)
+  }
   if (chance > r.shipVariantAbove) {
     return { verdict: 'ship_variant', reason: `${pct(chance)} chance preview_first beats control, above the pre-registered ${pct(r.shipVariantAbove)}` }
   }
@@ -57,3 +61,13 @@ export function decide(chance, r = rule) {
   }
   return { verdict: 'inconclusive', reason: `${pct(chance)} is between ${pct(r.keepControlBelow)} and ${pct(r.shipVariantAbove)}: keep control and re-test on real traffic` }
 }
+
+// Stops a run when the setup is broken (bad key, outage): each extra session would add a junk exposure in Flagsmith.
+export function makeStreakBreaker(limit) {
+  let streak = 0
+  return { record: outcome => (streak = outcome === 'error' ? streak + 1 : 0) >= limit }
+}
+
+// Personas invent realistic emails; never publish them in transcripts.
+const EMAIL = /[^\s@"'<>]+@[^\s@"'<>]+\.[^\s@"'<>]+/g
+export const redactText = text => (typeof text === 'string' ? text.replace(EMAIL, '[email]') : text)

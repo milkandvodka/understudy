@@ -2,8 +2,8 @@
 import { parseArgs } from 'node:util'
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { chromium } from 'playwright'
-import { runSession, MODEL } from './agent.js'
-import { summarize } from './actions.js'
+import { runSession, preflight, MODEL } from './agent.js'
+import { summarize, makeStreakBreaker } from './actions.js'
 
 const { values } = parseArgs({
   options: {
@@ -25,9 +25,18 @@ const runId = new Date().toISOString().replace(/[:.]/g, '-')
 const file = `runs/${runId}.jsonl`
 mkdirSync('runs', { recursive: true })
 
+try {
+  await preflight(apiKey)
+} catch (e) {
+  console.error(`${e.message}
+No sessions were run, so nothing reached Flagsmith.`)
+  process.exit(1)
+}
+
 // slowMo makes headed runs watchable for the demo video.
 const browser = await chromium.launch({ headless: !values.headed, slowMo: values.headed ? 300 : 0 })
 const results = []
+const breaker = makeStreakBreaker(3)
 let next = 0
 
 async function worker() {
@@ -48,6 +57,10 @@ async function worker() {
     appendFileSync(file, JSON.stringify(line) + '\n')
     results.push(line)
     console.log(`#${n + 1}/${total}  ${line.personaId.padEnd(18)} ${String(line.arm).padEnd(14)} ${line.outcome}${line.leaveReason ? `: ${line.leaveReason}` : ''}`)
+    if (breaker.record(line.outcome) && next < total) {
+      console.error('3 errors in a row: stopping the run so a broken setup does not keep adding exposures.')
+      next = total
+    }
   }
 }
 
