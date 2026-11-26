@@ -18,7 +18,11 @@ It works like this:
 
 ## Caught before launch
 
-Understudy's first run found a real bug. In `src/style.css`, the rule `button { display: block }` beat the `hidden` attribute, so the "Create your account" button never disappeared after a tap. Every persona kept tapping it and never reached the form. It was fixed in [`1634250`](../../commit/1634250) before any experiment launched. This is the kind of mistake you want an understudy to hit instead of your first real visitors.
+Understudy's first run found a real bug. In `src/style.css`, the rule `button { display: block }` beat the `hidden` attribute, so the "Create your account" button never disappeared after a tap. Every persona kept tapping it and never reached the form. It was fixed in [`1634250`](../../commit/1634250) before any experiment launched.
+
+The first run on a real model found a second one. A persona typed their roll number as `22CS1047`, got *"Roll number is 6–10 digits"* three times, and left: *"Roll number field rejects my real ID with an unclear format rule… not worth the hassle."* Plenty of colleges put letters in roll numbers, so the rule now accepts 5–12 letters or digits.
+
+Both are the kind of mistake you want an understudy to hit instead of your first real visitors.
 
 ## The experiment
 
@@ -72,7 +76,7 @@ for each session:
 npm ci
 npx playwright install chromium
 cp .env.example .env    # VITE_FLAGSMITH_ENV_ID (client-side key) + OLLAMA_API_KEY
-npm test                # 11 tests
+npm test                # 12 tests
 npm run dev             # Classmate on http://localhost:5173
 npm run understudy -- --sessions 20 --url http://localhost:5173            # rehearse
 npm run understudy -- --sessions 2 --url http://localhost:5173 --headed    # watch them
