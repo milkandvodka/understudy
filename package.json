@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "test": "vitest run",
-    "understudy": "node --env-file-if-exists=.env understudy/run.js"
+    "understudy": "node --env-file-if-exists=.env understudy/run.js",
+    "report": "node understudy/report.js"
   },
   "license": "MIT",
   "dependencies": {
