@@ -91,6 +91,7 @@ export async function runSession({ browser, url, persona, apiKey, maxSteps = 12 
   const steps = []
   const history = []
   let arm = null
+  let fallback = null // true = Flagsmith was too slow, the page showed control and the visitor is NOT enrolled
   let outcome = null
   let leaveReason = null
   let invalidStreak = 0
@@ -98,6 +99,7 @@ export async function runSession({ browser, url, persona, apiKey, maxSteps = 12 
     await page.goto(url)
     await page.waitForSelector('body[data-arm]', { timeout: 8000 })
     arm = await page.getAttribute('body', 'data-arm')
+    fallback = (await page.getAttribute('body', 'data-fallback')) === 'true'
     for (let i = 0; i < maxSteps && !outcome; i++) {
       const snapshot = await page.evaluate(snapshotPage)
       const raw = await chooseAction({ apiKey, persona, snapshot, history })
@@ -136,5 +138,5 @@ export async function runSession({ browser, url, persona, apiKey, maxSteps = 12 
     }
     await context.close()
   }
-  return { sessionId, personaId: persona.id, arm, outcome, leaveReason, steps, ms: Date.now() - started }
+  return { sessionId, personaId: persona.id, arm, fallback, outcome, leaveReason, steps, ms: Date.now() - started }
 }

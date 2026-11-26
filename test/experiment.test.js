@@ -1,5 +1,23 @@
 import { describe, it, expect } from 'vitest'
-import { resolveVariant, getVisitorId, withTimeout, CONTROL, VARIANT } from '../src/experiment.js'
+import { resolveVariant, getVisitorId, withTimeout, assignArm, CONTROL, VARIANT } from '../src/experiment.js'
+
+// Found in the rehearsal: a slow Flagsmith reply used to record an exposure for a variant the visitor never saw.
+describe('assignArm', () => {
+  it('records an exposure only when Flagsmith answers before the page decides', async () => {
+    let exposures = 0
+    const getFlag = () => { exposures++; return { value: 'preview_first' } }
+    const slowInit = () => new Promise(resolve => setTimeout(resolve, 50))
+    expect(await assignArm({ init: slowInit, getFlag, timeoutMs: 10 })).toEqual({ arm: CONTROL, fallback: true })
+    await new Promise(resolve => setTimeout(resolve, 80)) // the slow init finishes later...
+    expect(exposures).toBe(0) // ...and still never records an exposure for a variant nobody saw
+    expect(await assignArm({ init: async () => {}, getFlag, timeoutMs: 50 })).toEqual({ arm: VARIANT, fallback: false })
+    expect(exposures).toBe(1)
+  })
+  it('falls back to control when Flagsmith fails', async () => {
+    const result = await assignArm({ init: async () => { throw new Error('down') }, getFlag: () => ({ value: 'preview_first' }), timeoutMs: 50 })
+    expect(result).toEqual({ arm: CONTROL, fallback: true })
+  })
+})
 
 const memoryStorage = (seed = {}) => { const m = new Map(Object.entries(seed)); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => m.set(k, v) } }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/

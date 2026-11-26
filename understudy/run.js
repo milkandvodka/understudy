@@ -54,6 +54,8 @@ await browser.close()
 
 const { arms } = summarize(results)
 console.log(`\nRun ${runId} → ${file}`)
+const notEnrolled = results.filter(r => r.fallback).length
+if (notEnrolled) console.log(`${notEnrolled} session(s) fell back to control because Flagsmith was slow. They are counted below but not enrolled in the experiment.`)
 console.table(Object.fromEntries(Object.entries(arms).map(([arm, a]) => [arm, {
   sessions: a.sessions,
   signedUp: a.signedUp,

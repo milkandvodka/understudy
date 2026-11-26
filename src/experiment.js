@@ -22,6 +22,14 @@ export function getVisitorId(storage) {
   }
 }
 
+// Exposure happens only if Flagsmith is ready before the page decides; a late reply never enrols the visitor
+// in a variant they didn't see. `getFlag` is the call that records the exposure (getExperimentFlag).
+export async function assignArm({ init, getFlag, timeoutMs }) {
+  const ready = await withTimeout(Promise.resolve().then(init).then(() => true), timeoutMs, false)
+  if (!ready) return { arm: CONTROL, fallback: true }
+  return { arm: resolveVariant(getFlag()), fallback: false }
+}
+
 // Resolves to the promise's value, or to `fallback` on rejection or after `ms`. Never rejects.
 export const withTimeout = (promise, ms, fallback) =>
   Promise.race([

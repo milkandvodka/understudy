@@ -1,5 +1,5 @@
 import flagsmith from '@flagsmith/flagsmith'
-import { FLAG_KEY, VARIANT, EVENT, resolveVariant, getVisitorId, withTimeout } from './experiment.js'
+import { FLAG_KEY, VARIANT, EVENT, getVisitorId, assignArm } from './experiment.js'
 import { SAMPLE_SUBJECTS, attendanceStatus, validateSignup } from './classmate.js'
 
 const $ = id => document.getElementById(id)
@@ -11,15 +11,18 @@ let storage = null
 try { storage = window.localStorage } catch {}
 const visitorId = getVisitorId(storage)
 
-// Exposure is recorded by getExperimentFlag. If Flagsmith is slow or down, fall back to control after 2.5 s.
-const flag = await withTimeout((async () => {
-  await flagsmith.init({ environmentID: import.meta.env.VITE_FLAGSMITH_ENV_ID, identity: visitorId, enableEvents: true })
-  const f = flagsmith.getExperimentFlag(FLAG_KEY)
-  flush()
-  return f
-})(), 2500, null)
-
-const arm = resolveVariant(flag)
+// getExperimentFlag records the exposure, so it only runs if Flagsmith answered in time.
+// Slow or down: show control and stay out of the experiment.
+const { arm, fallback } = await assignArm({
+  init: () => flagsmith.init({ environmentID: import.meta.env.VITE_FLAGSMITH_ENV_ID, identity: visitorId, enableEvents: true }),
+  getFlag: () => {
+    const flag = flagsmith.getExperimentFlag(FLAG_KEY)
+    flush()
+    return flag
+  },
+  timeoutMs: 4000,
+})
+document.body.dataset.fallback = String(fallback)
 document.body.dataset.arm = arm
 
 function reveal(section) {
