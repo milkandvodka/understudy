@@ -2,7 +2,7 @@
 import { parseArgs } from 'node:util'
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { chromium } from 'playwright'
-import { runSession } from './agent.js'
+import { runSession, MODEL } from './agent.js'
 import { summarize } from './actions.js'
 
 const { values } = parseArgs({
@@ -19,7 +19,6 @@ if (!url) { console.error('Pass --url'); process.exit(1) }
 const apiKey = process.env.OLLAMA_API_KEY
 if (!apiKey) { console.error('Set OLLAMA_API_KEY in .env'); process.exit(1) }
 
-const model = process.env.LLM_MODEL || 'kimi-k2.6'
 const total = Number(values.sessions)
 const personas = JSON.parse(readFileSync(new URL('./personas.json', import.meta.url), 'utf8'))
 const runId = new Date().toISOString().replace(/[:.]/g, '-')
@@ -38,11 +37,11 @@ async function worker() {
     const startedAt = new Date().toISOString()
     let result
     try {
-      result = await runSession({ browser, url, persona, apiKey, model })
+      result = await runSession({ browser, url, persona, apiKey })
     } catch (e) {
       result = { personaId: persona.id, arm: null, outcome: 'error', leaveReason: e.message, steps: [] }
     }
-    const line = { runId, n, startedAt, model, url, ...result }
+    const line = { runId, n, startedAt, model: MODEL, url, ...result }
     appendFileSync(file, JSON.stringify(line) + '\n')
     results.push(line)
     console.log(`#${n + 1}/${total}  ${line.personaId.padEnd(18)} ${String(line.arm).padEnd(14)} ${line.outcome}${line.leaveReason ? `: ${line.leaveReason}` : ''}`)

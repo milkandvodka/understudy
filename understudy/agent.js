@@ -5,8 +5,9 @@ import { parseActionText, normalizeAction } from './actions.js'
 
 export const SYSTEM_PROMPT = `You are role-playing a real college student browsing a website on your phone. Stay in character as the persona you are given. Act the way this person really would: real people skim, hesitate, get bored or suspicious, and often leave without finishing anything. You are never required to sign up. If you choose to fill in a form, invent plausible details that fit your persona. Each turn you see the page text and its numbered interactive elements. Choose exactly one next action: click an element, type into a text field, or leave the site. Keep "thought" to one short sentence in your persona's voice. Reply with only a JSON object and nothing else: {"thought": string, "action": "click" | "type" | "leave", "target": element number or null, "text": text to type or null, "reason": why you are leaving, or null}`
 
-// Ollama Cloud by default; OLLAMA_HOST=http://localhost:11434 runs the personas on a local model instead.
-const OLLAMA_URL = `${process.env.OLLAMA_HOST ?? 'https://ollama.com'}/api/chat`
+// Pinned on purpose: every persona runs on this one model, through Ollama Cloud only.
+export const MODEL = 'deepseek-v4.1-flash:cloud'
+export const OLLAMA_URL = 'https://ollama.com/api/chat'
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 // Runs inside the page: number every visible control so the model can point at it.
@@ -50,9 +51,9 @@ Interactive elements:
 ${elements}`
 }
 
-export async function chooseAction({ apiKey, model, persona, snapshot, history }) {
+export async function chooseAction({ apiKey, persona, snapshot, history }) {
   const body = JSON.stringify({
-    model,
+    model: MODEL,
     stream: false,
     think: false,
     options: { temperature: 0.8 },
@@ -74,7 +75,7 @@ export async function chooseAction({ apiKey, model, persona, snapshot, history }
   }
 }
 
-export async function runSession({ browser, url, persona, apiKey, model, maxSteps = 12 }) {
+export async function runSession({ browser, url, persona, apiKey, maxSteps = 12 }) {
   const started = Date.now()
   const sessionId = crypto.randomUUID()
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
@@ -93,7 +94,7 @@ export async function runSession({ browser, url, persona, apiKey, model, maxStep
     arm = await page.getAttribute('body', 'data-arm')
     for (let i = 0; i < maxSteps && !outcome; i++) {
       const snapshot = await page.evaluate(snapshotPage)
-      const raw = await chooseAction({ apiKey, model, persona, snapshot, history })
+      const raw = await chooseAction({ apiKey, persona, snapshot, history })
       let action = normalizeAction(raw, snapshot.elements)
       const el = snapshot.elements.find(e => e.id === action.id)
       if (action.kind === 'click' || action.kind === 'type') {

@@ -62,7 +62,7 @@ for each session:
 ```
 
 - **Personas** ([`understudy/personas.json`](understudy/personas.json)): 10 students, from an anxious first-year to someone who once got spammed by a "free" app. They're written in second person and say nothing about either version.
-- **Model:** any Ollama model. The default is `kimi-k2.6` on Ollama Cloud. Set `OLLAMA_HOST=http://localhost:11434` to use a local model.
+- **Model:** every persona runs on `deepseek-v4.1-flash:cloud` through Ollama Cloud. It's pinned in [`understudy/agent.js`](understudy/agent.js) and checked by a test, so all sessions in an experiment use exactly the same model.
 - **Robust to messy model output:** JSON inside fences or chatter is parsed, invalid actions are recorded and skipped, and three invalid actions in a row end the session as an error. See [`understudy/actions.js`](understudy/actions.js).
 - **Agent identities are prefixed `us-`**, so they're easy to tell apart from humans in Flagsmith.
 
@@ -72,7 +72,7 @@ for each session:
 npm ci
 npx playwright install chromium
 cp .env.example .env    # VITE_FLAGSMITH_ENV_ID (client-side key) + OLLAMA_API_KEY
-npm test                # 10 tests
+npm test                # 11 tests
 npm run dev             # Classmate on http://localhost:5173
 npm run understudy -- --sessions 20 --url http://localhost:5173            # rehearse
 npm run understudy -- --sessions 2 --url http://localhost:5173 --headed    # watch them
