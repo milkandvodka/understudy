@@ -2,7 +2,9 @@
 
 **Rehearse a Flagsmith experiment on AI personas before real traffic arrives.**
 
-> 🎥 Demo video: _link coming_ · 🌐 Live page under test: https://milkandvodka.github.io/understudy/ · 📊 [Full report](REPORT.md)
+[![Watch the 87-second demo of Understudy](docs/media/demo-thumbnail.jpg)](https://youtu.be/pZ6SbkKAjz0)
+
+**▶ Demo video:** https://youtu.be/pZ6SbkKAjz0 · **Live page under test:** https://milkandvodka.github.io/understudy/ · **Full report:** [REPORT.md](REPORT.md)
 
 **Result:** showing sample data before signup **cut sign-ups by 58%** (Flagsmith: 23.4% → 9.7%, 95% credible interval −80% to −37%, under 1% chance it beats control). The rule written before launch says keep control. Without Understudy, this would have been learned on real users.
 
