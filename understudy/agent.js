@@ -82,6 +82,12 @@ export async function runSession({ browser, url, persona, apiKey, maxSteps = 12 
   // Pre-seed the visitor id so agent identities are recognisable in Flagsmith (us-<sessionId>).
   await context.addInitScript(([key, value]) => localStorage.setItem(key, value), [STORAGE_KEY, AGENT_PREFIX + sessionId])
   const page = await context.newPage()
+  // Track the page's own Flagsmith event requests so the session never closes on one mid-flight.
+  const inflight = new Set()
+  const isEvent = request => request.url().includes('events.api.flagsmith.com')
+  page.on('request', request => { if (isEvent(request)) inflight.add(request) })
+  page.on('requestfinished', request => inflight.delete(request))
+  page.on('requestfailed', request => inflight.delete(request))
   const steps = []
   const history = []
   let arm = null
@@ -121,8 +127,13 @@ export async function runSession({ browser, url, persona, apiKey, maxSteps = 12 
     outcome = 'error'
     leaveReason = e.message.split('\n')[0]
   } finally {
-    // Let the page's flushed Flagsmith events leave before the visitor "closes the tab".
-    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {})
+    // Let the page's flushed Flagsmith events finish before the visitor "closes the tab".
+    // (waitForLoadState('networkidle') is no good here: it resolves at once on a page that went idle earlier,
+    // which dropped almost every conversion in the first rehearsal.)
+    await new Promise(resolve => setTimeout(resolve, 300)) // flush() starts its fetch asynchronously
+    for (const deadline = Date.now() + 5000; inflight.size > 0 && Date.now() < deadline;) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
     await context.close()
   }
   return { sessionId, personaId: persona.id, arm, outcome, leaveReason, steps, ms: Date.now() - started }
