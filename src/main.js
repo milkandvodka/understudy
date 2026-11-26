@@ -1,6 +1,6 @@
 import flagsmith from '@flagsmith/flagsmith'
-import { FLAG_KEY, VARIANT, EVENT, getVisitorId, assignArm } from './experiment.js'
-import { SAMPLE_SUBJECTS, attendanceStatus, validateSignup } from './classmate.js'
+import { FLAG_KEY, EVENT, getVisitorId, assignArm } from './experiment.js'
+import { validateSignup } from './classmate.js'
 
 const $ = id => document.getElementById(id)
 
@@ -34,25 +34,13 @@ function button(label, onClick) {
   const b = document.createElement('button')
   b.type = 'button'
   b.textContent = label
-  b.addEventListener('click', () => { b.hidden = true; onClick() }) // one step at a time, same in both arms
+  b.addEventListener('click', () => { b.hidden = true; onClick() }) // one step at a time
   return b
 }
 
-if (arm === VARIANT) {
-  $('subjects').innerHTML = SAMPLE_SUBJECTS.map(({ name, attended, total }) => {
-    const s = attendanceStatus(attended, total)
-    return `<tr class="${s.mustAttend ? 'low' : ''}">
-      <th scope="row">${name}</th>
-      <td><span class="bar" style="--p:${s.percent}%" aria-hidden="true"></span>${s.percent}%</td>
-      <td>${s.canSkip}</td>
-      <td>${s.mustAttend}</td>
-    </tr>`
-  }).join('')
-  $('cta').append(button('Try it with sample data', () => reveal($('preview'))))
-  $('preview').append(button('Make this yours — create your account', () => reveal($('signup'))))
-} else {
-  $('cta').append(button('Create your account', () => reveal($('signup'))))
-}
+// Experiment 617 shipped signup_first (preview_first: −58% sign-ups), so the preview branch was removed.
+// The flag is still read, so onboarding_flow remains the switch for any next experiment.
+$('cta').append(button('Create your account', () => reveal($('signup'))))
 
 $('signup-form').addEventListener('submit', event => {
   event.preventDefault()
