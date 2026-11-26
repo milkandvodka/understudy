@@ -1,45 +1,45 @@
 # Rehearsal report: experiment 617
 
-Flagsmith numbers as of 2026-11-26T11:11Z. Understudy sessions since 2026-11-26T11:00:00Z: 120 (118 enrolled).
+Flagsmith numbers as of 2026-11-26T11:38Z. Understudy sessions since 2026-11-26T11:00:00Z: 360 (358 enrolled).
 
 ## Flagsmith (Bayesian engine)
 
 | Variant | Exposures | Conversions | Rate |
 |---|---|---|---|
-| signup_first | 64 | 10 | 15.6% |
-| preview_first | 52 | 7 | 13.5% |
+| signup_first | 171 | 40 | 23.4% |
+| preview_first | 185 | 18 | 9.7% |
 
-Lift of preview_first vs control: **-13.8%**, 95% credible interval [-91.6%, 63.9%]. Chance preview_first beats control: **36.0%**.
+Lift of preview_first vs control: **-58.4%**, 95% credible interval [-79.9%, -36.9%]. Chance preview_first beats control: **< 1%**.
 
 ## Decision (pre-registered rule, applied in code)
 
 `understudy/decision.json`: ship preview_first above 95.0%, keep control below 5.0%, otherwise inconclusive.
 
-**Verdict: inconclusive.** 36% is between 5% and 95%: keep control and re-test on real traffic.
+**Verdict: keep_control.** Flagsmith gives preview_first a < 1% chance of beating control (rule: ship above 95.0%, keep control below 5.0%).
 
 ## Does Flagsmith agree with the transcripts?
 
 | Variant | Understudy sessions | Flagsmith exposures | Understudy sign-ups | Flagsmith conversions |
 |---|---|---|---|---|
-| signup_first | 65 | 64 | 10 | 10 |
-| preview_first | 53 | 52 | 7 | 7 |
+| signup_first | 172 | 171 | 40 | 40 |
+| preview_first | 186 | 185 | 18 | 18 |
 
-Sessions that ended in an error (the persona never acted, usually a network drop) still count as exposures in Flagsmith: signup_first 4, preview_first 1. Excluding them, the sign-up rates are signup_first 16.4%, preview_first 13.5%.
+Sessions that ended in an error (the persona never acted, usually a network drop) still count as exposures in Flagsmith: signup_first 4, preview_first 1. Excluding them, the sign-up rates are signup_first 23.8%, preview_first 9.7%.
 
 ## Who each version helped or hurt (directional, small cells)
 
 | Persona | signup_first | preview_first |
 |---|---|---|
-| at-68-percent | 2/10 | 1/2 |
-| between-classes | 0/5 | 0/7 |
-| burned-before | 0/8 | 0/4 |
-| club-lead | 0/7 | 0/5 |
-| fresher-anxious | 5/8 | 2/4 |
-| idle-scroller | 0/6 | 0/5 |
-| lateral-entry | 2/5 | 3/6 |
-| privacy-guarded | 0/3 | 0/9 |
-| spreadsheet-senior | 0/6 | 0/6 |
-| topper-95 | 1/7 | 1/5 |
+| at-68-percent | 5/22 | 2/14 |
+| between-classes | 0/13 | 0/23 |
+| burned-before | 0/23 | 0/13 |
+| club-lead | 0/18 | 1/18 |
+| fresher-anxious | 13/18 | 7/18 |
+| idle-scroller | 0/12 | 0/23 |
+| lateral-entry | 11/16 | 7/19 |
+| privacy-guarded | 0/14 | 0/22 |
+| spreadsheet-senior | 1/16 | 0/20 |
+| topper-95 | 10/20 | 1/16 |
 
 ## Why personas left
 

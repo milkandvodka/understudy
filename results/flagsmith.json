@@ -1,13 +1,18 @@
 {
-  "note": "Copied by hand from the Flagsmith dashboard (Production, experiment 617) after each wave. No API key needed.",
+  "note": "Copied by hand from the Flagsmith dashboard (Production, experiment 617) after the final wave. No API key needed.",
   "experimentId": 617,
   "launchedAt": "2026-11-26T11:00:00Z",
-  "asOf": "2026-11-26T11:11Z",
+  "asOf": "2026-11-26T11:38Z",
   "arms": {
-    "signup_first": { "exposures": 64, "conversions": 10 },
-    "preview_first": { "exposures": 52, "conversions": 7 }
+    "signup_first": { "exposures": 171, "conversions": 40 },
+    "preview_first": { "exposures": 185, "conversions": 18 }
   },
-  "lift": -0.138,
-  "interval95": [-0.916, 0.639],
-  "chanceVariantBeatsControl": 0.36
+  "lift": -0.584,
+  "interval95": [-0.799, -0.369],
+  "chanceVariantBeatsControl": 0.01,
+  "chanceDisplayed": "< 1%",
+  "history": [
+    { "asOf": "2026-11-26T11:11Z", "afterWave": 1, "exposures": [64, 52], "conversions": [10, 7], "lift": -0.138, "interval95": [-0.916, 0.639], "chanceVariantBeatsControl": 0.36 },
+    { "asOf": "2026-11-26T11:38Z", "afterWave": 3, "exposures": [171, 185], "conversions": [40, 18], "lift": -0.584, "interval95": [-0.799, -0.369], "chanceVariantBeatsControl": "< 1%" }
+  ]
 }

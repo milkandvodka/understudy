@@ -15,6 +15,8 @@ const all = summarize(enrolled)
 const acted = summarize(enrolled.filter(s => s.outcome !== 'error'))
 const verdict = decide(fs.chanceVariantBeatsControl, rule)
 const pct = x => `${(x * 100).toFixed(1)}%`
+// Flagsmith shows small chances as a bound ("< 1%"); print it as shown and use the bound for the rule.
+const chanceText = fs.chanceDisplayed ?? pct(fs.chanceVariantBeatsControl)
 const arms = ['signup_first', 'preview_first']
 
 const lines = [
@@ -28,13 +30,13 @@ const lines = [
   '|---|---|---|---|',
   ...arms.map(a => `| ${a} | ${fs.arms[a].exposures} | ${fs.arms[a].conversions} | ${pct(fs.arms[a].conversions / fs.arms[a].exposures)} |`),
   '',
-  `Lift of preview_first vs control: **${pct(fs.lift)}**, 95% credible interval [${pct(fs.interval95[0])}, ${pct(fs.interval95[1])}]. Chance preview_first beats control: **${pct(fs.chanceVariantBeatsControl)}**.`,
+  `Lift of preview_first vs control: **${pct(fs.lift)}**, 95% credible interval [${pct(fs.interval95[0])}, ${pct(fs.interval95[1])}]. Chance preview_first beats control: **${chanceText}**.`,
   '',
   '## Decision (pre-registered rule, applied in code)',
   '',
   `\`understudy/decision.json\`: ship preview_first above ${pct(rule.shipVariantAbove)}, keep control below ${pct(rule.keepControlBelow)}, otherwise inconclusive.`,
   '',
-  `**Verdict: ${verdict.verdict}.** ${verdict.reason}.`,
+  `**Verdict: ${verdict.verdict}.** Flagsmith gives preview_first a ${chanceText} chance of beating control (rule: ship above ${pct(rule.shipVariantAbove)}, keep control below ${pct(rule.keepControlBelow)}).`,
   '',
   '## Does Flagsmith agree with the transcripts?',
   '',
