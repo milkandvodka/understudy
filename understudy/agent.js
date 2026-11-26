@@ -63,12 +63,19 @@ export async function chooseAction({ apiKey, persona, snapshot, history }) {
     ],
   })
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(OLLAMA_URL, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body,
-      signal: AbortSignal.timeout(90_000),
-    })
+    let res
+    try {
+      res = await fetch(OLLAMA_URL, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body,
+        signal: AbortSignal.timeout(90_000),
+      })
+    } catch (e) {
+      // Network blip (fetch failed / timeout): retry like a 5xx.
+      if (attempt < 3) { await sleep(5000); continue }
+      throw e
+    }
     if (res.ok) return parseActionText((await res.json()).message?.content ?? '')
     if ((res.status === 429 || res.status >= 500) && attempt < 3) { await sleep(5000); continue }
     throw new Error(`Ollama ${res.status}: ${(await res.text()).slice(0, 200)}`)
