@@ -22,7 +22,9 @@ Understudy's first run found a real bug. In `src/style.css`, the rule `button { 
 
 The first run on a real model found a second one. A persona typed their roll number as `22CS1047`, got *"Roll number is 6–10 digits"* three times, and left: *"Roll number field rejects my real ID with an unclear format rule… not worth the hassle."* Plenty of colleges put letters in roll numbers, so the rule now accepts 5–12 letters or digits.
 
-Both are the kind of mistake you want an understudy to hit instead of your first real visitors.
+The rehearsal (Understudy's own counts checked against Flagsmith's) found a third one, this time in Understudy itself. Flagsmith's exposures matched the transcripts exactly (33 and 28), but almost every conversion was missing. Each persona's browser was closing as soon as they signed up, while the `signup_completed` request was still in flight. The fix: a session now waits for the page's Flagsmith event requests to finish before it closes. Without that cross-check, the real experiment would have quietly undercounted every signup.
+
+All three are the kind of mistake you want an understudy to hit instead of your first real visitors.
 
 ## The experiment
 
