@@ -33,7 +33,8 @@ let next = 0
 async function worker() {
   while (next < total) {
     const n = next++
-    const persona = personas[Math.floor(Math.random() * personas.length)]
+    // Round-robin personas: equal mix per run. Flagsmith still randomises the arm per visitor.
+    const persona = personas[n % personas.length]
     const startedAt = new Date().toISOString()
     let result
     try {
