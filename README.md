@@ -80,7 +80,7 @@ for each session:
 npm ci
 npx playwright install chromium
 cp .env.example .env    # VITE_FLAGSMITH_ENV_ID (client-side key) + OLLAMA_API_KEY
-npm test                # 21 tests
+npm test                # 20 tests
 npm run dev             # Classmate on http://localhost:5173
 npm run understudy -- --sessions 20 --url http://localhost:5173            # rehearse
 npm run understudy -- --sessions 2 --url http://localhost:5173 --headed    # watch them
@@ -114,7 +114,9 @@ On control, curiosity pushes them through signup: *"This is exactly what I've be
 
 ## Shipping the winner
 
-_Coming: the flag change in Flagsmith and the cleanup commit that deletes the losing variant._
+Experiment 617 was completed in Flagsmith with **Roll out control**: everyone now gets `signup_first` through the same flag, with no redeploy. The results stay frozen in the dashboard (356 enrolled, the numbers above).
+
+Then the losing variant's code was deleted in [`eb07c16`](../../commit/eb07c16): the sample-data screen, its styles and its tests. The flag is still read, so `onboarding_flow` stays the switch for the next experiment. The obvious next hypothesis is a preview that shows the student's **own** numbers, rehearsed with Understudy first.
 
 ## Limitations
 
