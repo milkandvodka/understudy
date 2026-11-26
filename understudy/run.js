@@ -38,7 +38,9 @@ async function worker() {
     const startedAt = new Date().toISOString()
     let result
     try {
-      result = await runSession({ browser, url, persona, apiKey })
+      // --headed: print each thought live, next to the visible browser (for demos)
+      const onStep = values.headed ? s => console.log(`  [${persona.id}] ${s.thought ?? ''}  →  ${s.action}${s.label ? ` \"${s.label}\"` : ''}${s.text ? ` «${s.text}»` : ''}`) : undefined
+      result = await runSession({ browser, url, persona, apiKey, onStep })
     } catch (e) {
       result = { personaId: persona.id, arm: null, outcome: 'error', leaveReason: e.message, steps: [] }
     }

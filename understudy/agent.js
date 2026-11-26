@@ -82,7 +82,7 @@ export async function chooseAction({ apiKey, persona, snapshot, history }) {
   }
 }
 
-export async function runSession({ browser, url, persona, apiKey, maxSteps = 12 }) {
+export async function runSession({ browser, url, persona, apiKey, maxSteps = 12, onStep }) {
   const started = Date.now()
   const sessionId = crypto.randomUUID()
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
@@ -122,6 +122,7 @@ export async function runSession({ browser, url, persona, apiKey, maxSteps = 12 
         }
       }
       steps.push({ thought: raw?.thought ?? null, action: action.kind, label: el?.label ?? null, text: action.text ?? null, why: action.why ?? action.reason ?? null })
+      onStep?.(steps.at(-1))
       if (action.kind === 'invalid') {
         if (++invalidStreak >= 3) { outcome = 'error'; leaveReason = `3 invalid actions in a row (last: ${action.why})` }
         continue
