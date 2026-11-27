@@ -99,6 +99,8 @@ Production experiment 617, 360 persona visits in three waves of 120 (DeepSeek V4
 | `signup_first` (control) | 171 | 40 | **23.4%** |
 | `preview_first` | 185 | 18 | **9.7%** |
 
+![Flagsmith's results page for experiment 617: 356 enrolled, control 23.4% vs preview_first 9.7%, −58.4%, 95% credible interval −79.9% to −36.9%](docs/media/flagsmith-results.jpg)
+
 - **What Flagsmith says:** preview_first changed sign-ups by **−58.4%**, with a 95% credible interval of **−79.9% to −36.9%**. Even the most optimistic plausible value is a big drop. Chance that preview_first beats control: **< 1%**.
 - **What the pre-registered rule says:** below 5%, so **keep control**. The hypothesis is rejected, clearly. The numbers are copied by hand from the dashboard into [`results/flagsmith.json`](results/flagsmith.json). `decide()` in [`understudy/actions.js`](understudy/actions.js) then makes the call, and refuses anything that isn't a probability.
 - **Robustness:** by chance, preview_first drew more of the personas who never sign up. Averaging each persona's own rate instead gives control 22.0% and preview_first 10.2%, a **−53.7%** change. The conclusion holds.
@@ -117,6 +119,8 @@ On control, curiosity pushes them through signup: *"This is exactly what I've be
 ## Shipping the winner
 
 Experiment 617 was completed in Flagsmith with **Roll out control**: everyone now gets `signup_first` through the same flag, with no redeploy. The results stay frozen in the dashboard (356 enrolled, the numbers above).
+
+![Experiment 617 in Flagsmith: Completed, "Control is the winner", control rolled out to everyone](docs/media/flagsmith-verdict.jpg)
 
 Then the losing variant's code was deleted in [`eb07c16`](../../commit/eb07c16): the sample-data screen, its styles and its tests. The flag is still read, so `onboarding_flow` stays the switch for the next experiment. The obvious next hypothesis is a preview that shows the student's **own** numbers, rehearsed with Understudy first.
 
